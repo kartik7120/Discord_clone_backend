@@ -16,9 +16,5 @@
   "bugs": {
     "url": "https://github.com/kartik7120/Discord_clone_backend/issues"
   },
-  "homepage": "https://github.com/kartik7120/Discord_clone_backend#readme",
-  "dependencies": {
-    "express": "^4.18.1",
-    "socket.io": "^4.5.1"
-  }
+  "homepage": "https://github.com/kartik7120/Discord_clone_backend#readme"
 }
