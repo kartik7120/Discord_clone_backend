@@ -33,9 +33,9 @@ io.on("connection", (socket) => {
         console.log(socket.rooms);
         callback(`Joined room ${roomName}`);
     })
-    socket.on("message", (message: string) => {
+    socket.on("message", (message: string, channelName: string) => {
         console.log("Recieved message from the frontend = ", message);
-        socket.broadcast.emit("messages", message);
+        socket.broadcast.to(channelName).emit("messages", message);
     })
 })
 
