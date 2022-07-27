@@ -28,6 +28,12 @@ io.on("connection", (socket) => {
         console.log(`socket ${socket.id} disconnected , reason = ${reason}`);
     })
     socket.on("joinRoom", (arg: joinRoom, callback) => {
+        const socketRoomArray = socket.rooms;
+        const id = socket.id;
+        for (let room of socketRoomArray) {
+            if (room !== id)
+                socket.leave(room);
+        }
         const roomName = arg.roomName;
         socket.join(roomName);
         console.log(socket.rooms);
@@ -35,7 +41,7 @@ io.on("connection", (socket) => {
     })
     socket.on("message", (message: string, channelName: string) => {
         console.log("Recieved message from the frontend = ", message);
-        socket.broadcast.to(channelName).emit("messages", message);
+        socket.to(channelName).emit("messages", message);
     })
 })
 
