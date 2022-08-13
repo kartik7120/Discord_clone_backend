@@ -44,8 +44,9 @@ io.of((name, auth, next) => {
         console.log(socket.rooms);
         callback(`Joined room ${roomName}`);
     })
-    socket.on("message", (message: string, channelName: string) => {
+    socket.on("message", (message: string, channelName: string, userSub: string) => {
         console.log("Recieved message from the frontend = ", message);
+        console.log(`User sub = ${userSub}`);
         socket.to(channelName).emit("messages", message);
     })
     socket.on("disconnect_namespace", async (socket_id: string) => {
