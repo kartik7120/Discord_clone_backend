@@ -61,6 +61,9 @@ io.of((name, auth, next) => {
         console.log(`${socket_id} got disconnected from the namespace`);
         socket.disconnect();
     })
+    socket.on("sticker", (stickerUrl: string) => {
+        socket.broadcast.emit("sticker", stickerUrl);
+    })
     socket.on("gif", (gifURL: string) => {
         socket.broadcast.emit("gif", gifURL);
     })
