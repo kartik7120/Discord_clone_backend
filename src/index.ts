@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { Server } from "socket.io";
 import joinRoom from "./interfaces";
+import axios from "axios";
 dotenv.config();
 const app = express();
 app.use(cors());
@@ -44,10 +45,22 @@ io.of((name, auth, next) => {
         console.log(socket.rooms);
         callback(`Joined room ${roomName}`);
     })
-    socket.on("message", (message: string, channelName: string, userSub: string) => {
-        console.log("Recieved message from the frontend = ", message);
-        console.log(`User sub = ${userSub}`);
-        socket.to(channelName).emit("messages", message);
+    socket.on("message", async (message: string, channelName: string, userSub: string) => {
+        // console.log("Recieved message from the frontend = ", message);
+        // console.log(`User sub = ${userSub}`);
+        const URL = `${process.env.AUTH_MANAGEMENT_API_AUDIENCE}users/${userSub}?include_fields=true`;
+        const config = {
+            headers: {
+                'Authorization': process.env.AUTH_MANAGEMENT_API_TOKEN!
+            },
+            "content-type": "application/json; charset=utf-8"
+        }
+        const response = await axios.get(URL, config);
+        // console.log(response);
+        socket.to(channelName).emit("messages", message, {
+            name: response.data.name,
+            picture: response.data.picture
+        });
     })
     socket.on("disconnect_namespace", async (socket_id: string) => {
         const socketRooms = await io.of(namespace).fetchSockets();
