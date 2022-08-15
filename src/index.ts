@@ -5,6 +5,13 @@ import cors from "cors";
 import { Server } from "socket.io";
 import joinRoom from "./interfaces";
 import axios from "axios";
+import mongoose from "mongoose";
+mongoose.connect('mongodb://localhost:27017/Discord')
+    .then(() => {
+        console.log("Connected to MongoDB database");
+    }).catch((err) => {
+        console.log(`Error occured while connecting to the Mongo DB database = ${err}`)
+    })
 dotenv.config();
 const app = express();
 app.use(cors());
