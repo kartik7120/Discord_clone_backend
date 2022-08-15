@@ -56,3 +56,4 @@ const messageSchema = new mongoose.Schema<messageUser>({
 
 const Message = mongoose.model("Message", messageSchema);
 export default Message;
+export { messageBearer, messageUser }
