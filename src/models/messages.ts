@@ -25,7 +25,7 @@ const messageSchema = new mongoose.Schema<messageUser>({
     },
     message_content: {
         type: String,
-        required: [true, "Please specify the contents of the message"],
+        required: [true, "Please specify the contents of the message"]
     },
     message_bearer: {
         type: mongoose.Schema.Types.ObjectId,
