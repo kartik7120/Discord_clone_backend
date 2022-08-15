@@ -6,7 +6,7 @@ interface messageUser {
     room: Types.ObjectId,
     channel: Types.ObjectId,
     message_content: string,
-    message_bearer: Types.ObjectId
+    message_bearer: String
 }
 
 const messageSchema = new mongoose.Schema<messageUser>({
@@ -28,7 +28,7 @@ const messageSchema = new mongoose.Schema<messageUser>({
         required: [true, "Please specify the contents of the message"]
     },
     message_bearer: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: [true, "Please specify the bearer"]
     }
 })
