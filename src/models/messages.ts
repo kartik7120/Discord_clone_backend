@@ -1,13 +1,34 @@
 import mongoose, { Types } from "mongoose";
 
+interface messageBearer {
+    username: string,
+    picture: string,
+    sub_id: String
+}
+
 interface messageUser {
     category: "video" | "audio" | "text",
     date: Date,
     room: Types.ObjectId,
     channel: Types.ObjectId,
     message_content: string,
-    message_bearer: String
+    message_bearer: messageBearer
 }
+
+const BearerSchema = new mongoose.Schema<messageBearer>({
+    username: {
+        type: String,
+        default: "Unknown"
+    },
+    picture: {
+        type: String,
+        default: "No picture"
+    },
+    sub_id: {
+        type: String,
+        required: [true, "Please provide sub id for the user"]
+    }
+})
 
 const messageSchema = new mongoose.Schema<messageUser>({
     category: {
@@ -28,7 +49,7 @@ const messageSchema = new mongoose.Schema<messageUser>({
         required: [true, "Please specify the contents of the message"]
     },
     message_bearer: {
-        type: String,
+        type: BearerSchema,
         required: [true, "Please specify the bearer"]
     }
 })
