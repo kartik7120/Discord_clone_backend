@@ -1,14 +1,14 @@
 import mongoose, { Types } from "mongoose";
 
 interface messageBearer {
-    username: string,
-    picture: string,
+    username?: string,
+    picture?: string,
     sub_id: String
 }
 
 interface messageUser {
     category: "video" | "audio" | "text",
-    date: Date,
+    date?: Date,
     room: Types.ObjectId,
     channel: Types.ObjectId,
     message_content: string,
