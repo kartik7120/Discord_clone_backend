@@ -4,7 +4,7 @@ interface userInterface {
     username: string,
     user_id: string,
     picture: string,
-    friends?: Types.ObjectId,
+    friends?: Types.ObjectId[],
     user_channels?: Types.ObjectId[]
 }
 
@@ -22,12 +22,14 @@ const userSchema = new mongoose.Schema<userInterface>({
         type: String,
         required: [true, "Please provide url for profile picture of the user"]
     },
-    user_channels: {
-        type: [mongoose.Schema.Types.ObjectId],
-    },
-    friends: {
-        type: [mongoose.Schema.Types.ObjectId]
-    }
+    user_channels: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Channel"
+    }],
+    friends: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }]
 })
 
 const User = mongoose.model("User", userSchema);
