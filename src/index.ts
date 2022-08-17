@@ -1,4 +1,4 @@
-import express from "express";
+import express, { urlencoded } from "express";
 import { createServer } from "http";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -6,6 +6,7 @@ import { Server } from "socket.io";
 import joinRoom from "./interfaces";
 import axios from "axios";
 import mongoose from "mongoose";
+import router from "./routes/namespace.js";
 mongoose.connect('mongodb://localhost:27017/Discord')
     .then(() => {
         console.log("Connected to MongoDB database");
@@ -14,7 +15,10 @@ mongoose.connect('mongodb://localhost:27017/Discord')
     })
 dotenv.config();
 const app = express();
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cors());
+app.use("/namespace", router);
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
     cors: {
