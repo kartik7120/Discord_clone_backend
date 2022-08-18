@@ -10,6 +10,16 @@ const router = express.Router();
 //     res.json(namespaces.user_channels);
 // })
 
+router.get("/:id", async (req, res, next) => {
+    const { id } = req.params;
+    try {
+        const namespace = await Channel.findById(id).populate("room");
+        res.json(namespace);
+    } catch (error) {
+        res.status(500).json("Error occured while fetching the namespace");
+    }
+})
+
 router.post("/createNamespace/:namespace", async (req, res, next) => {
     const { namespace } = req.params;
     const userBody: createNamespace = req.body;
