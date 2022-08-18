@@ -10,6 +10,17 @@ const router = express.Router();
 //     res.json(namespaces.user_channels);
 // })
 
+router.get("/userNamespaces", async (req, res, next) => {
+    const userBody: createNamespace = req.body;
+    try {
+        const currUser = await fetchUser(`${userBody.userSub}`);
+        const userChannels = await User.findOne({ user_id: userBody.userSub }).populate("user_channels");
+        res.json(userChannels?.user_channels);
+    } catch (error) {
+        res.status(500).json("Error occured while fetching user channels")
+    }
+})
+
 router.get("/:id", async (req, res, next) => {
     const { id } = req.params;
     try {

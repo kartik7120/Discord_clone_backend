@@ -15,7 +15,7 @@ const channelSchema = new mongoose.Schema<channelSchema>({
     },
     room: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Room"
+        ref: "Room",
     }],
     description: {
         type: String,
