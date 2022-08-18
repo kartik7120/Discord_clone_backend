@@ -14,7 +14,7 @@ router.post("/createNamespace/:namespace", async (req, res, next) => {
         await newChannel.save();
         const currUser = await fetchUser(`${userBody.userSub}`);
         const user = await User.findOneAndUpdate({ user_id: userBody.userSub },
-            { $push: { user_channels: newChannel._id } }, { new: true });
+            { $push: { user_channels: newChannel._id } }, { new: true, upsert: true });
         // console.log(currUser);
         res.json(namespace);
     } catch (error) {
