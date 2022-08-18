@@ -1,16 +1,22 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 interface channelSchema {
-    room: string[],
+    channelName: string
+    room?: Types.ObjectId[],
     description?: string,
     picture?: string
 }
 
 const channelSchema = new mongoose.Schema<channelSchema>({
-    room: {
-        type: [String],
-        required: [true, "Please provide rooms array"]
+    channelName: {
+        type: String,
+        lowercase: true,
+        required: [true, "Please provide name of the channel"]
     },
+    room: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Room"
+    }],
     description: {
         type: String,
         minlength: 10

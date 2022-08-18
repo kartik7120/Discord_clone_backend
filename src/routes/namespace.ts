@@ -5,12 +5,17 @@ import { fetchUser } from "../middlewares/fetchUser.js";
 import { createNamespace } from "../interfaces.js";
 const router = express.Router();
 
+// router.get("/", async (req, res, next) => {
+//     const namespaces = await User.find().populate("user_channels");
+//     res.json(namespaces.user_channels);
+// })
+
 router.post("/createNamespace/:namespace", async (req, res, next) => {
     const { namespace } = req.params;
     const userBody: createNamespace = req.body;
     console.log(`usersub = ${userBody.userSub}`);
     try {
-        const newChannel = new Channel({ room: namespace });
+        const newChannel = new Channel({ channelName: namespace });
         await newChannel.save();
         const currUser = await fetchUser(`${userBody.userSub}`);
         const user = await User.findOneAndUpdate({ user_id: userBody.userSub },
@@ -20,6 +25,20 @@ router.post("/createNamespace/:namespace", async (req, res, next) => {
     } catch (error) {
         res.status(500).json("Error occured while creating a namespace, Please try again");
     }
+})
+
+router.delete("/:id", async (req, res, next) => {
+    const { id } = req.params;
+    const userBody: createNamespace = req.body;
+    try {
+        const deletedDocuemnt = await Channel.findByIdAndRemove(id);
+        const currUser = await fetchUser(`${userBody.userSub}`);
+        const user = await User.findOneAndUpdate({ user_id: userBody.userSub }, { $pull: { user_channels: id } }, { new: true }).populate("user_channels")
+        res.json(user);
+    } catch (error) {
+        res.status(500).json("Error occured while deleting a namespace");
+    }
+
 })
 
 export default router;
