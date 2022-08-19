@@ -1,9 +1,9 @@
-import mongoose from "mongoose";
-import { messageBearer, messageUser } from "./messages";
-import Message from "./messages";
+import mongoose, { Types } from "mongoose";
+import { messageBearer, messageUser } from "../models/messages.js";
+import Message from "../models/messages.js";
 interface roomInterface {
     roomName: string,
-    message?: messageUser[]
+    message?: Types.ObjectId[]
 }
 
 const roomSchema = new mongoose.Schema<roomInterface>({
@@ -12,7 +12,7 @@ const roomSchema = new mongoose.Schema<roomInterface>({
         required: [true, "Please provide the name for room"],
     },
     message: {
-        type: [Message]
+        type: [mongoose.Schema.Types.ObjectId]
     }
 })
 

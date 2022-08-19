@@ -3,6 +3,7 @@ import Channel from "../models/channels.js";
 import User from "../models/users.js";
 import { fetchUser } from "../middlewares/fetchUser.js";
 import { createNamespace } from "../interfaces.js";
+import Room from "../models/rooms.js";
 const router = express.Router();
 
 // router.get("/", async (req, res, next) => {
@@ -60,6 +61,20 @@ router.delete("/:id", async (req, res, next) => {
         res.status(500).json("Error occured while deleting a namespace");
     }
 
+})
+
+router.post("/createRooms", async (req, res, next) => {
+    const { roomName, userSub, channelId } = req.body;
+    try {
+        const newRoom = new Room({ roomName });
+        await newRoom.save();
+        const channel = await Channel.findOneAndUpdate({ _id: channelId }, { $push: { room: newRoom._id } });
+        const user = await User.findOne({ user_id: userSub }).populate({ path: "user_channel", populate: { path: "room" } });
+        console.log(user?.user_channels);
+        res.json(user?.user_channels);
+    } catch (error) {
+        res.status(500).json("Error occured while creating new room");
+    }
 })
 
 export default router;
