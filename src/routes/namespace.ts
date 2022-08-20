@@ -26,7 +26,7 @@ router.get("/:id", async (req, res, next) => {
     const { id } = req.params;
     try {
         const namespace = await Channel.findById(id).populate("room");
-        res.json(namespace);
+        res.json(namespace?.room);
     } catch (error) {
         res.status(500).json("Error occured while fetching the namespace");
     }
