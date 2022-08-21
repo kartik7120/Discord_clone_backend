@@ -74,4 +74,16 @@ router.post("/createRooms", async (req, res, next) => {
     }
 })
 
+router.delete("/deleteRooms/:namespaceId/rooms/:roomId", async (req, res, next) => {
+    const { namespaceId, roomId } = req.params;
+    try {
+        const deleteRoom = await Room.findByIdAndDelete({ _id: roomId });
+        const channels = await Channel.findOneAndUpdate({ _id: namespaceId }, { $pull: { room: roomId } }, { new: true })
+            .populate("room");
+        res.json(channels?.room);
+    } catch (error) {
+        res.status(500).json("Error occured while deleting room in a channel")
+    }
+})
+
 export default router;
