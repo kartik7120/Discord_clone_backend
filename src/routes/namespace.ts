@@ -67,10 +67,9 @@ router.post("/createRooms", async (req, res, next) => {
     try {
         const newRoom = new Room({ roomName });
         await newRoom.save();
-        const channel = await Channel.findOneAndUpdate({ _id: channelId }, { $push: { room: newRoom._id } });
-        const user = await User.findOne({ user_id: userSub }).populate({ path: "user_channel", populate: { path: "room" } });
-        console.log(user?.user_channels);
-        res.json(user?.user_channels);
+        const channel = await Channel.findOneAndUpdate({ _id: channelId }, { $push: { room: newRoom._id } }, { new: true }).populate("room");
+        const user = await User.findOne({ user_id: userSub }).populate({ path: "user_channels", populate: { path: "room" } });
+        res.json(channel?.room);
     } catch (error) {
         res.status(500).json("Error occured while creating new room");
     }
