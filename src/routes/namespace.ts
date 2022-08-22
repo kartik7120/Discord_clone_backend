@@ -65,7 +65,7 @@ router.delete("/:id", async (req, res, next) => {
 router.post("/createRooms", async (req, res, next) => {
     const { roomName, userSub, channelId } = req.body;
     try {
-        const newRoom = new Room({ roomName });
+        const newRoom = new Room({ roomName, channel: channelId });
         await newRoom.save();
         const channel = await Channel.findOneAndUpdate({ _id: channelId }, { $push: { room: newRoom._id } }, { new: true }).populate("room");
         res.json(channel?.room);
@@ -82,7 +82,22 @@ router.delete("/deleteRooms/:namespaceId/rooms/:roomId", async (req, res, next) 
             .populate("room");
         res.json(channels?.room);
     } catch (error) {
-        res.status(500).json("Error occured while deleting room in a channel")
+        res.status(500).json("Error occured while deleting room in a channel");
+    }
+})
+
+router.delete("/deleteNamespace/:id", async (req, res, next) => {
+    const { userSub } = req.body;
+    const { id } = req.params;
+    try {
+        const deletedRooms = await Room.deleteMany({ channel: id });
+        const deletedChannel = await Channel.findByIdAndDelete(id);
+        const user = await User.findOneAndUpdate({ user_id: userSub }, { $pull: { user_channels: id } }, { new: true })
+            .populate("user_channels");
+        res.json(user?.user_channels);
+    } catch (error) {
+        console.log(`Error while deleting namespace = ${error}`);
+        res.status(500).json("Error occured while deleting channel");
     }
 })
 

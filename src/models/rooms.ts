@@ -3,7 +3,8 @@ import { messageBearer, messageUser } from "../models/messages.js";
 import Message from "../models/messages.js";
 interface roomInterface {
     roomName: string,
-    message?: Types.ObjectId[]
+    message?: Types.ObjectId[],
+    channel?: Types.ObjectId
 }
 
 const roomSchema = new mongoose.Schema<roomInterface>({
@@ -13,6 +14,10 @@ const roomSchema = new mongoose.Schema<roomInterface>({
     },
     message: {
         type: [mongoose.Schema.Types.ObjectId]
+    },
+    channel: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Channel"
     }
 })
 
