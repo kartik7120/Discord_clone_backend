@@ -19,7 +19,8 @@ const channelSchema = new mongoose.Schema<channelSchema>({
     }],
     description: {
         type: String,
-        minlength: 10
+        minlength: 10,
+        default: "Hey come join this awesome community"
     },
     picture: {
         type: String

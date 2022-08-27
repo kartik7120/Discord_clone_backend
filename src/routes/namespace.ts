@@ -11,6 +11,15 @@ const router = express.Router();
 //     res.json(namespaces.user_channels);
 // })
 
+router.get("/", async (req, res, next) => {
+    try {
+        const channels = await Channel.find({});
+        res.json(channels);
+    } catch (error) {
+        res.status(500).json("Error occured while fetching channels , please try again")
+    }
+})
+
 router.get("/userNamespaces/:id", async (req, res, next) => {
     const { id } = req.params;
     try {
