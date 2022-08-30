@@ -6,11 +6,6 @@ import { createNamespace } from "../interfaces.js";
 import Room from "../models/rooms.js";
 const router = express.Router();
 
-// router.get("/", async (req, res, next) => {
-//     const namespaces = await User.find().populate("user_channels");
-//     res.json(namespaces.user_channels);
-// })
-
 router.get("/", async (req, res, next) => {
     try {
         const channels = await Channel.find({});
@@ -38,6 +33,27 @@ router.get("/:id", async (req, res, next) => {
         res.json(namespace?.room);
     } catch (error) {
         res.status(500).json("Error occured while fetching the namespace");
+    }
+})
+
+router.post("/joinChannel/:id", async (req, res, next) => {
+    const { id } = req.params;
+    const { userSub } = req.body;
+    try {
+        const user = await User.findOneAndUpdate({ user_id: userSub }, { $push: { user_channels: id } }, { new: true });
+        res.json(user?.user_channels);
+    } catch (error) {
+        res.status(500).json("Error occured while joining the room");
+    }
+})
+
+router.get("/fetchChannel/:id", async (req, res, next) => {
+    const { id } = req.params;
+    try {
+        const channel = await Channel.findById(id).populate("room");
+        res.json(channel);
+    } catch (error) {
+        res.status(500).json("Error occured while fetching channel");
     }
 })
 
