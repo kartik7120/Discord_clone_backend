@@ -57,6 +57,17 @@ router.get("/fetchChannel/:id", async (req, res, next) => {
     }
 })
 
+router.post("/leaveNamespace/:id", async (req, res, next) => {
+    const { id } = req.params;
+    try {
+        const { userSub } = req.body;
+        const user = await User.findOneAndUpdate({ user_id: userSub }, { $pull: { user_channels: id } }, { new: true });
+        res.json(user?.user_channels);
+    } catch (error) {
+        res.status(500).json("Error occured while leaving channel")
+    }
+})
+
 router.post("/createNamespace/:namespace", async (req, res, next) => {
     const { namespace } = req.params;
     const userBody: createNamespace = req.body;
