@@ -56,21 +56,16 @@ io.of((name, auth, next) => {
         console.log(socket.rooms);
         callback(`Joined room ${roomName}`);
     })
-    socket.on("message", async (message: string, channelName: string, userSub: string) => {
-        // console.log("Recieved message from the frontend = ", message);
-        // console.log(`User sub = ${userSub}`);
-        const URL = `${process.env.AUTH_MANAGEMENT_API_AUDIENCE}users/${userSub}?include_fields=true`;
-        const config = {
-            headers: {
-                'Authorization': process.env.AUTH_MANAGEMENT_API_TOKEN!
-            },
-            "content-type": "application/json; charset=utf-8"
-        }
-        const response = await axios.get(URL, config);
-        // console.log(response);
+    socket.on("message", async (message: string, {
+        message_content,
+        userSub, channelName,
+        userPicture, userName,
+        category, roomId, channelId
+    }) => {
         socket.to(channelName).emit("messages", message, {
-            name: response.data.name,
-            picture: response.data.picture
+            userSub, channelName,
+            userPicture, userName,
+            category, roomId, channelId,
         });
     })
     socket.on("disconnect_namespace", async (socket_id: string) => {
@@ -86,11 +81,27 @@ io.of((name, auth, next) => {
         console.log(`${socket_id} got disconnected from the namespace`);
         socket.disconnect();
     })
-    socket.on("sticker", (stickerUrl: string) => {
-        socket.broadcast.emit("sticker", stickerUrl);
+    socket.on("sticker", (stickerUrl: string, { message_content,
+        userSub, channelName,
+        userPicture, userName,
+        category, roomId, channelId }) => {
+        socket.broadcast.emit("sticker", stickerUrl, {
+            message_content,
+            userSub, channelName,
+            userPicture, userName,
+            category, roomId, channelId
+        });
     })
-    socket.on("gif", (gifURL: string) => {
-        socket.broadcast.emit("gif", gifURL);
+    socket.on("gif", (gifURL: string, { message_content,
+        userSub, channelName,
+        userPicture, userName,
+        category, roomId, channelId }) => {
+        socket.broadcast.emit("gif", gifURL, {
+            message_content,
+            userSub, channelName,
+            userPicture, userName,
+            category, roomId, channelId
+        });
     })
     socket.on("leave-room", (room, id) => {
         console.log(`socket ${id} left ${room} room`);

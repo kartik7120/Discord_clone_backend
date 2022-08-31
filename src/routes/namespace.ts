@@ -4,6 +4,7 @@ import User from "../models/users.js";
 import { fetchUser } from "../middlewares/fetchUser.js";
 import { createNamespace } from "../interfaces.js";
 import Room from "../models/rooms.js";
+import Message from "../models/messages.js";
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
@@ -134,6 +135,40 @@ router.delete("/deleteNamespace/:id", async (req, res, next) => {
     } catch (error) {
         console.log(`Error while deleting namespace = ${error}`);
         res.status(500).json("Error occured while deleting channel");
+    }
+})
+
+router.get("/messages/:roomId", async (req, res, next) => {
+    const { roomId } = req.params;
+    try {
+        const room = await Room.findOne({ _id: roomId }).populate("message");
+        res.json(room?.message);
+    } catch (error) {
+        res.status(500).json("Error occured while fetching messages");
+    }
+})
+
+router.post("/messages/:roomId", async (req, res, next) => {
+    const { roomId } = req.params;
+    try {
+        const { userSub, category, message_content, userPicture, userName } = req.body;
+        const newMessage = new Message({
+            category,
+            room: roomId,
+            message_content,
+            message_bearer: {
+                sub_id: userSub,
+                picture: userPicture,
+                username: userName
+            }
+        })
+        await newMessage.save();
+        const room = await Room.findOneAndUpdate({ _id: roomId }, { $push: { message: newMessage._id } },
+            { new: true }).populate("message");
+        res.json(room?.message);
+    } catch (error) {
+        console.log(`Error while saving messages = ${error}`);
+        res.status(500).json("Error occured while saving message");
     }
 })
 

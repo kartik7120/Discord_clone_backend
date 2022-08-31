@@ -32,7 +32,7 @@ const BearerSchema = new mongoose.Schema<messageBearer>({
 
 const messageSchema = new mongoose.Schema<messageUser>({
     category: {
-        enum: ["video", "audio", "text"],
+        enum: ["video", "audio", "text", "image"],
         type: String,
         required: [true, "Please specify the category of the message"]
     },

@@ -12,9 +12,10 @@ const roomSchema = new mongoose.Schema<roomInterface>({
         type: String,
         required: [true, "Please provide the name for room"],
     },
-    message: {
-        type: [mongoose.Schema.Types.ObjectId]
-    },
+    message: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"Message"
+    }],
     channel: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Channel"
