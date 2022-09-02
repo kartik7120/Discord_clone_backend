@@ -1,5 +1,6 @@
 interface joinRoom {
-    roomName: string
+    roomId: string,
+    users: string[]
 }
 
 interface createNamespace {

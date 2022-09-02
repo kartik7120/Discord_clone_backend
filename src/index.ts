@@ -28,14 +28,15 @@ const io = new Server(httpServer, {
 app.get("/", (req, res) => {
     res.send("Hello World");
 })
-
-io.of((name, auth, next) => {
-    console.log("name = ", name);
-    console.log("auth = ", auth);
-    next(null, true);
-}).on("connection", async (socket) => {
+io.use((socket, next) => {
+    let handshake = socket.handshake;
+    socket.data = handshake.auth;
+    next()
+})
+io.on("connection", async (socket) => {
     const namespace = socket.nsp.name;
-    const sockets = await io.of(namespace).fetchSockets();
+    // const sockets = await io.of(namespace).fetchSockets();
+    // console.log(`Data recieved from socket = ${JSON.stringify(socket.data)}`)
     // sockets.forEach(socket => {
     //     console.log(`socket id = ${socket.id} and rooms = ${socket.rooms}`);
     // });
@@ -44,17 +45,23 @@ io.of((name, auth, next) => {
     const numeberOfClients = io.of(namespace).sockets.size;
     const ioNumberOfClients = io.engine.clientsCount;
     console.log(`Number of sockets connecteed in ${namespace} namespace = ${ioNumberOfClients}`);
-    socket.on("joinRoom", (arg: joinRoom, callback) => {
+    socket.on("joinRoom", async (arg: joinRoom, callback) => {
+        // console.log(`Number of clients in ${arg.roomId} room = ${io.of(namespace).in(arg.roomId).allSockets()}`)
         const socketRoomArray = socket.rooms;
         const id = socket.id;
         for (let room of socketRoomArray) {
             if (room !== id)
                 socket.leave(room);
         }
-        const roomName = arg.roomName;
-        socket.join(roomName);
-        console.log(socket.rooms);
-        callback(`Joined room ${roomName}`);
+        const roomId = arg.roomId;
+        socket.join(roomId);
+        const joinedSockets = await io.in(arg.roomId).fetchSockets();
+        arg.users = [];
+        for (let socket of joinedSockets) {
+            arg.users.push(socket.data);
+        }
+        io.emit("userJoined", arg.users);
+        callback(`Joined room ${roomId}`, arg.users);
     })
     socket.on("message", async (message: string, {
         message_content,
@@ -117,3 +124,8 @@ io.of((name, auth, next) => {
 httpServer.listen(process.env.PORT, () => {
     console.log(`Listening on port ${process.env.PORT}`);
 })
+// .of((name, auth, next) => {
+//     console.log("name = ", name);
+//     console.log("auth = ", auth);
+//     next(null, true);
+// })
