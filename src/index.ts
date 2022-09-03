@@ -31,11 +31,12 @@ app.get("/", (req, res) => {
 io.use((socket, next) => {
     let handshake = socket.handshake;
     socket.data = handshake.auth;
-    next()
+    next();
 })
 io.on("connection", async (socket) => {
     const namespace = socket.nsp.name;
-    // const sockets = await io.of(namespace).fetchSockets();
+    const sockets = await io.of(namespace).fetchSockets();
+    // console.log(`sockets in namespace ${namespace}= ${JSON.stringify(sockets)}`);
     // console.log(`Data recieved from socket = ${JSON.stringify(socket.data)}`)
     // sockets.forEach(socket => {
     //     console.log(`socket id = ${socket.id} and rooms = ${socket.rooms}`);
@@ -44,9 +45,14 @@ io.on("connection", async (socket) => {
     console.log(`socket id = ${socket.id} in ${namespace} namespace`);
     const numeberOfClients = io.of(namespace).sockets.size;
     const ioNumberOfClients = io.engine.clientsCount;
-    console.log(`Number of sockets connecteed in ${namespace} namespace = ${ioNumberOfClients}`);
+    console.log(`Number of sockets connecteed in ${namespace} namespace = ${numeberOfClients}`);
     socket.on("joinRoom", async (arg: joinRoom, callback) => {
         // console.log(`Number of clients in ${arg.roomId} room = ${io.of(namespace).in(arg.roomId).allSockets()}`)
+        socket.data = {
+            userSub: arg.userSub,
+            userName: arg.userName,
+            userPicture: arg.userPicture
+        }
         const socketRoomArray = socket.rooms;
         const id = socket.id;
         for (let room of socketRoomArray) {
@@ -69,14 +75,15 @@ io.on("connection", async (socket) => {
         userPicture, userName,
         category, roomId, channelId
     }) => {
-        socket.to(channelName).emit("messages", message, {
+        socket.broadcast.to(roomId).emit("messages", message, {
             userSub, channelName,
             userPicture, userName,
             category, roomId, channelId,
         });
     })
-    socket.on("disconnect_namespace", async (socket_id: string) => {
+    socket.on("disconnect_namespace", async (socket_id: string, users: string[]) => {
         const socketRooms = await io.of(namespace).fetchSockets();
+        users = [];
         for (let socket of socketRooms) {
             if (socket.id === socket_id) {
                 for (let room of socket.rooms) {
@@ -84,7 +91,9 @@ io.on("connection", async (socket) => {
                     socket.leave(room);
                 }
             }
+            users.push(socket.data);
         }
+        io.emit("userJoined", users);
         console.log(`${socket_id} got disconnected from the namespace`);
         socket.disconnect();
     })
@@ -92,7 +101,7 @@ io.on("connection", async (socket) => {
         userSub, channelName,
         userPicture, userName,
         category, roomId, channelId }) => {
-        socket.broadcast.emit("sticker", stickerUrl, {
+        socket.broadcast.to(roomId).emit("sticker", stickerUrl, {
             message_content,
             userSub, channelName,
             userPicture, userName,
@@ -103,7 +112,7 @@ io.on("connection", async (socket) => {
         userSub, channelName,
         userPicture, userName,
         category, roomId, channelId }) => {
-        socket.broadcast.emit("gif", gifURL, {
+        socket.broadcast.to(roomId).emit("gif", gifURL, {
             message_content,
             userSub, channelName,
             userPicture, userName,
