@@ -37,18 +37,11 @@ io.use((socket, next) => {
 io.on("connection", async (socket) => {
     const namespace = socket.nsp.name;
     const sockets = await io.of(namespace).fetchSockets();
-    // console.log(`sockets in namespace ${namespace}= ${JSON.stringify(sockets)}`);
-    // console.log(`Data recieved from socket = ${JSON.stringify(socket.data)}`)
-    // sockets.forEach(socket => {
-    //     console.log(`socket id = ${socket.id} and rooms = ${socket.rooms}`);
-    // });
-    // console.log(`Connected to ${namespace} namespace`);
     console.log(`socket id = ${socket.id} in ${namespace} namespace`);
     const numeberOfClients = io.of(namespace).sockets.size;
     const ioNumberOfClients = io.engine.clientsCount;
     console.log(`Number of sockets connecteed in ${namespace} namespace = ${numeberOfClients}`);
     socket.on("joinRoom", async (arg: joinRoom, callback) => {
-        // console.log(`Number of clients in ${arg.roomId} room = ${io.of(namespace).in(arg.roomId).allSockets()}`)
         socket.data = {
             userSub: arg.userSub,
             userName: arg.userName,
