@@ -5,6 +5,7 @@ import { fetchUser } from "../middlewares/fetchUser.js";
 import { createNamespace } from "../interfaces.js";
 import Room from "../models/rooms.js";
 import Message from "../models/messages.js";
+import cloudinary from "../cloudinary/index.js";
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
@@ -151,7 +152,7 @@ router.get("/messages/:roomId", async (req, res, next) => {
 router.post("/messages/:roomId", async (req, res, next) => {
     const { roomId } = req.params;
     try {
-        const { userSub, category, message_content, userPicture, userName } = req.body;
+        let { userSub, category, message_content, userPicture, userName } = req.body;
         const newMessage = new Message({
             category,
             room: roomId,
@@ -167,7 +168,7 @@ router.post("/messages/:roomId", async (req, res, next) => {
             { new: true }).populate("message");
         res.json(room?.message);
     } catch (error) {
-        console.log(`Error while saving messages = ${error}`);
+        console.log(`Error while saving messages = ${JSON.stringify(error)}`);
         res.status(500).json("Error occured while saving message");
     }
 })
