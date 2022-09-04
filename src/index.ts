@@ -16,8 +16,8 @@ mongoose.connect('mongodb://localhost:27017/Discord')
 dotenv.config();
 const app = express();
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json({limit:"50mb"}));
-app.use(express.raw({limit:"50mb"}));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.raw({ limit: "50mb" }));
 app.use(cors());
 app.use("/namespace", router);
 const httpServer = createServer(app);
@@ -134,8 +134,3 @@ io.on("connection", async (socket) => {
 httpServer.listen(process.env.PORT, () => {
     console.log(`Listening on port ${process.env.PORT}`);
 })
-// .of((name, auth, next) => {
-//     console.log("name = ", name);
-//     console.log("auth = ", auth);
-//     next(null, true);
-// })
