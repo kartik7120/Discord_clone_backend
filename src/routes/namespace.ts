@@ -173,4 +173,35 @@ router.post("/messages/:roomId", async (req, res, next) => {
     }
 })
 
+router.get("/friends", async (req, res, next) => {
+    const { userSub } = req.body;
+    try {
+        const user = await User.findOne({ user_id: userSub }).populate("friends");
+        res.json(user?.friends)
+    } catch (error) {
+        res.status(500).json("Error occured while fetching friends")
+    }
+})
+
+router.get("/friends/friendRequest/:userSub", async (req, res, next) => {
+    const { userSub } = req.params;
+    try {
+        const user = await User.findOne({ user_id: userSub }).populate("friendRequest");
+        res.json(user?.friendRequest);
+    } catch (error) {
+        res.status(500).json("Error occured while fetching friend request")
+    }
+})
+
+router.post("/friends/friendRequest", async (req, res, next) => {
+    const { userSub, friendSub } = req.body;
+    try {
+        const user = await User.findOneAndUpdate({ user_id: friendSub }, { $push: { friendRequest: userSub } });
+        res.json(user?.friendRequest);
+    } catch (error) {
+        console.log(JSON.stringify(`Error while making friend request ${error}`))
+        res.status(500).json("Error occured while sending friend request");
+    }
+})
+
 export default router;
