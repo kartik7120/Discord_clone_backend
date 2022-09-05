@@ -5,7 +5,8 @@ interface userInterface {
     user_id: string,
     picture: string,
     friends?: Types.ObjectId[],
-    user_channels?: Types.ObjectId[]
+    user_channels?: Types.ObjectId[],
+    friendRequest?: Types.ObjectId[]
 }
 
 const userSchema = new mongoose.Schema<userInterface>({
@@ -27,6 +28,10 @@ const userSchema = new mongoose.Schema<userInterface>({
         ref: "Channel"
     }],
     friends: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }],
+    friendRequest: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     }]

@@ -7,6 +7,7 @@ import joinRoom from "./interfaces";
 import axios from "axios";
 import mongoose from "mongoose";
 import router from "./routes/namespace.js";
+debugger;
 mongoose.connect('mongodb://localhost:27017/Discord')
     .then(() => {
         console.log("Connected to MongoDB database");
