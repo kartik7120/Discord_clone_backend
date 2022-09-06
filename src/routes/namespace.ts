@@ -178,7 +178,10 @@ router.get("/friends/:userSub", async (req, res, next) => {
     const { userSub } = req.params;
     try {
         const user = await User.findOne({ user_id: userSub }).populate("friends");
-        res.json(user?.friends)
+        if (!user) {
+            return res.json("User does not exists");
+        }
+        res.json(user?.friends);
     } catch (error) {
         res.status(500).json("Error occured while fetching friends")
     }
@@ -195,13 +198,14 @@ router.post("/friends", async (req, res, next) => {
     }
 })
 
-router.delete("/friends", async (req, res, next) => {
+router.delete("/friends/deleteFriend", async (req, res, next) => {
     const { userSub, _id } = req.body;
     try {
         const user = await User.findOneAndUpdate({ user_id: userSub },
             { $pull: { friends: _id } }, { new: true }).populate("friends");
         res.json(user?.friends);
     } catch (error) {
+        console.log(`Error occured while deleting a friend = ${JSON.stringify(error)}`);
         res.status(500).json("Error occured while removing friends");
     }
 })
@@ -232,12 +236,8 @@ router.post("/friends/friendRequest", async (req, res, next) => {
     try {
         console.log(`userSub = ${userSub} , friendSub = ${friendSub}`);
         const friend = await User.findOne({ user_id: userSub });
-        // console.log(`friend in friend request = ${friend}`);
-        // console.log(`Friend id =  ${friend?._id}`);
         const user = await User.findOneAndUpdate({ user_id: friendSub },
             { $push: { friendRequest: new mongoose.Types.ObjectId(friend?._id) } }, { new: true, upsert: true });
-        // console.log(user?.friendRequest);
-        // await user?.save();
         res.json(user?.friendRequest);
     } catch (error) {
         console.log(JSON.stringify(`Error while making friend request ${error}`));
