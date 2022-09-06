@@ -12,7 +12,7 @@ interface userInterface {
 const userSchema = new mongoose.Schema<userInterface>({
     username: {
         type: String,
-        required: [true, "Please enter username of the user"],
+        // required: [true, "Please enter username of the user"],
         minlength: 5
     },
     user_id: {
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema<userInterface>({
     },
     picture: {
         type: String,
-        required: [true, "Please provide url for profile picture of the user"]
+        // required: [true, "Please provide url for profile picture of the user"]
     },
     user_channels: [{
         type: mongoose.Schema.Types.ObjectId,

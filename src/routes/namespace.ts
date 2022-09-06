@@ -6,6 +6,7 @@ import { createNamespace } from "../interfaces.js";
 import Room from "../models/rooms.js";
 import Message from "../models/messages.js";
 import cloudinary from "../cloudinary/index.js";
+import mongoose from "mongoose";
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
@@ -187,7 +188,18 @@ router.get("/friends/friendRequest/:userSub", async (req, res, next) => {
     const { userSub } = req.params;
     try {
         const user = await User.findOne({ user_id: userSub }).populate("friendRequest");
-        res.json(user?.friendRequest);
+        console.log(`user in get request for friend request = ${user}`);
+        if (!user) {
+            res.json("No user exists")
+        }
+        else
+            if (!user.friendRequest) {
+                res.json("No friend requests present")
+            }
+            else {
+                console.log(`user request = ${user.friendRequest}`);
+                res.json(user?.friendRequest);
+            }
     } catch (error) {
         res.status(500).json("Error occured while fetching friend request")
     }
@@ -196,11 +208,31 @@ router.get("/friends/friendRequest/:userSub", async (req, res, next) => {
 router.post("/friends/friendRequest", async (req, res, next) => {
     const { userSub, friendSub } = req.body;
     try {
-        const user = await User.findOneAndUpdate({ user_id: friendSub }, { $push: { friendRequest: userSub } });
+        console.log(`userSub = ${userSub} , friendSub = ${friendSub}`);
+        const friend = await User.findOne({ user_id: userSub });
+        // console.log(`friend in friend request = ${friend}`);
+        // console.log(`Friend id =  ${friend?._id}`);
+        const user = await User.findOneAndUpdate({ user_id: friendSub },
+            { $push: { friendRequest: new mongoose.Types.ObjectId(friend?._id) } }, { new: true, upsert: true });
+        // console.log(user?.friendRequest);
+        // await user?.save();
         res.json(user?.friendRequest);
     } catch (error) {
-        console.log(JSON.stringify(`Error while making friend request ${error}`))
+        console.log(JSON.stringify(`Error while making friend request ${error}`));
         res.status(500).json("Error occured while sending friend request");
+    }
+})
+
+router.delete("/friends/friendRequest", async (req, res, next) => {
+    const { userSub, _id } = req.body;
+    try {
+        console.log(`userSub = ${userSub} and _id = ${_id} in delete request`);
+        const user = await User.findOneAndUpdate({ user_id: userSub }, { $pull: { friendRequest: _id } }, { new: true })
+            .populate("friendRequest");
+
+        res.json(user?.friendRequest);
+    } catch (error) {
+        res.status(500).json("Error occured while deleting friend request");
     }
 })
 
