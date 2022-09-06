@@ -29,11 +29,13 @@ const userSchema = new mongoose.Schema<userInterface>({
     }],
     friends: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
+        ref: "User",
+        default: []
     }],
     friendRequest: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
+        ref: "User",
+        default: []
     }]
 })
 
