@@ -174,13 +174,35 @@ router.post("/messages/:roomId", async (req, res, next) => {
     }
 })
 
-router.get("/friends", async (req, res, next) => {
-    const { userSub } = req.body;
+router.get("/friends/:userSub", async (req, res, next) => {
+    const { userSub } = req.params;
     try {
         const user = await User.findOne({ user_id: userSub }).populate("friends");
         res.json(user?.friends)
     } catch (error) {
         res.status(500).json("Error occured while fetching friends")
+    }
+})
+
+router.post("/friends", async (req, res, next) => {
+    const { userSub, _id } = req.body;
+    try {
+        const user = await User.findOneAndUpdate({ user_id: userSub }, { $pull: { friendRequest: _id } });
+        const user2 = await User.findOneAndUpdate({ user_id: userSub }, { $push: { friends: _id } }).populate("friends");
+        res.json(user2?.friends);
+    } catch (error) {
+        res.status(500).json("Error occured while adding friends");
+    }
+})
+
+router.delete("/friends", async (req, res, next) => {
+    const { userSub, _id } = req.body;
+    try {
+        const user = await User.findOneAndUpdate({ user_id: userSub },
+            { $pull: { friends: _id } }, { new: true }).populate("friends");
+        res.json(user?.friends);
+    } catch (error) {
+        res.status(500).json("Error occured while removing friends");
     }
 })
 
