@@ -18,6 +18,27 @@ router.get("/", async (req, res, next) => {
     }
 })
 
+router.post("/userData", async (req, res, next) => {
+    const { userSub, userPicture, userName } = req.body;
+    try {
+        const user = await User.findOne({ user_id: userSub });
+        if (user) {
+            return res.json("User already present");
+        }
+        else {
+            const newUser = new User({
+                picture: userPicture,
+                username: userName,
+                user_id: userSub
+            })
+            await newUser.save();
+            return res.json("New user saved in the database");
+        }
+    } catch (error) {
+        res.status(500).json("Error occured while saving userData")
+    }
+})
+
 router.get("/userNamespaces/:id", async (req, res, next) => {
     const { id } = req.params;
     try {
@@ -232,12 +253,14 @@ router.get("/friends/friendRequest/:userSub", async (req, res, next) => {
 })
 
 router.post("/friends/friendRequest", async (req, res, next) => {
-    const { userSub, friendSub } = req.body;
+    const { userSub, friendSub, friendName, friendPicture } = req.body;
     try {
         console.log(`userSub = ${userSub} , friendSub = ${friendSub}`);
-        const friend = await User.findOne({ user_id: userSub });
+        const friend = await User.findOneAndUpdate({ user_id: userSub },
+            { $set: { picture: friendPicture, username: friendName } }, { new: true });
         const user = await User.findOneAndUpdate({ user_id: friendSub },
-            { $push: { friendRequest: new mongoose.Types.ObjectId(friend?._id) } }, { new: true, upsert: true });
+            { $push: { friendRequest: friend?._id } },
+            { new: true, upsert: true }).populate("friendRequest");
         res.json(user?.friendRequest);
     } catch (error) {
         console.log(JSON.stringify(`Error while making friend request ${error}`));
