@@ -9,7 +9,7 @@ interface messageBearer {
 interface messageUser {
     category: "video" | "audio" | "text",
     date?: Date,
-    room: Types.ObjectId,
+    room?: Types.ObjectId,
     channel: Types.ObjectId,
     message_content: string,
     message_bearer: messageBearer
@@ -42,7 +42,7 @@ const messageSchema = new mongoose.Schema<messageUser>({
     },
     room: {
         type: mongoose.Schema.Types.ObjectId,
-        required: [true, "Please specify the room id"]
+        // required: [true, "Please specify the room id"]
     },
     message_content: {
         type: String,

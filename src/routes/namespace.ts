@@ -248,7 +248,6 @@ router.post("/friends/messages/:friendSub", async (req, res, next) => {
         let { userSub, category, message_content, userPicture, userName } = req.body;
         const newMessage = new Message({
             category,
-            room: friendSub,
             message_content,
             message_bearer: {
                 sub_id: userSub,
@@ -261,9 +260,9 @@ router.post("/friends/messages/:friendSub", async (req, res, next) => {
             { new: true }).populate("message");
         const room2 = await Room.findOneAndUpdate({ friend_id: userSub }, { $push: { message: newMessage._id } },
             { new: true }).populate("message");
-        res.json(room?.message);
-
+        res.json(room2?.message);
     } catch (error) {
+        console.log(`Error occured while saving message for friend room = ${JSON.stringify(error)}`);
         res.status(500).json("Error occured while saving message for friend room");
     }
 })
