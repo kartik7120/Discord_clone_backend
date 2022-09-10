@@ -5,6 +5,7 @@ import { fetchUser } from "../middlewares/fetchUser.js";
 import { createNamespace } from "../interfaces.js";
 import Room from "../models/rooms.js";
 import Message from "../models/messages.js";
+import FriendRoom from "../models/friendRoom.js";
 import cloudinary from "../cloudinary/index.js";
 import mongoose from "mongoose";
 const router = express.Router();
@@ -127,7 +128,8 @@ router.post("/createRooms", async (req, res, next) => {
     try {
         const newRoom = new Room({ roomName, channel: channelId });
         await newRoom.save();
-        const channel = await Channel.findOneAndUpdate({ _id: channelId }, { $push: { room: newRoom._id } }, { new: true }).populate("room");
+        const channel = await Channel.findOneAndUpdate({ _id: channelId }, { $push: { room: newRoom._id } },
+            { new: true }).populate("room");
         res.json(channel?.room);
     } catch (error) {
         res.status(500).json("Error occured while creating new room");
@@ -195,6 +197,19 @@ router.post("/messages/:roomId", async (req, res, next) => {
     }
 })
 
+router.get("/friend/message/:friendSub", async (req, res, next) => {
+    const { friendSub } = req.params;
+    try {
+        console.log(`friendSub in friend message get request = ${friendSub}`);
+        const friend = await Room.findOne({ friend_id: friendSub }).populate("message");
+        console.log(`friend in friend message get request = ${friend}`);
+        res.json(friend?.message);
+    } catch (error) {
+        console.log(`Error occured while fetching friend messages = ${error} `);
+        res.status(500).json("Error occured while fetching friend messages");
+    }
+})
+
 router.get("/friends/:userSub", async (req, res, next) => {
     const { userSub } = req.params;
     try {
@@ -209,13 +224,47 @@ router.get("/friends/:userSub", async (req, res, next) => {
 })
 
 router.post("/friends", async (req, res, next) => {
-    const { userSub, _id } = req.body;
+    const { userSub, _id, friendSub, friend_id } = req.body;
     try {
         const user = await User.findOneAndUpdate({ user_id: userSub }, { $pull: { friendRequest: _id } });
         const user2 = await User.findOneAndUpdate({ user_id: userSub }, { $push: { friends: _id } }).populate("friends");
+        await User.findOneAndUpdate({ user_id: friendSub }, { $pull: { friends: _id } });
+        // Write query to add friend in the users list
+        console.log(`Friend sub = ${friendSub},friendId = ${friend_id}, userSub = ${userSub} and userId = ${_id}`)
+        const room1 = new Room({ friend_id: friendSub, roomName: friend_id });
+        const room2 = new Room({ friend_id: userSub, roomName: _id });
+        await room1.save();
+        await room2.save();
         res.json(user2?.friends);
     } catch (error) {
         res.status(500).json("Error occured while adding friends");
+    }
+})
+
+
+router.post("/friends/messages/:friendSub", async (req, res, next) => {
+    const { friendSub } = req.params;
+    try {
+        let { userSub, category, message_content, userPicture, userName } = req.body;
+        const newMessage = new Message({
+            category,
+            room: friendSub,
+            message_content,
+            message_bearer: {
+                sub_id: userSub,
+                picture: userPicture,
+                username: userName
+            }
+        })
+        await newMessage.save();
+        const room = await Room.findOneAndUpdate({ friend_id: friendSub }, { $push: { message: newMessage._id } },
+            { new: true }).populate("message");
+        const room2 = await Room.findOneAndUpdate({ friend_id: userSub }, { $push: { message: newMessage._id } },
+            { new: true }).populate("message");
+        res.json(room?.message);
+
+    } catch (error) {
+        res.status(500).json("Error occured while saving message for friend room");
     }
 })
 
@@ -235,7 +284,7 @@ router.get("/friends/friendRequest/:userSub", async (req, res, next) => {
     const { userSub } = req.params;
     try {
         const user = await User.findOne({ user_id: userSub }).populate("friendRequest");
-        console.log(`user in get request for friend request = ${user}`);
+        // console.log(`user in get request for friend request = ${user}`);
         if (!user) {
             res.json("No user exists")
         }
@@ -244,7 +293,7 @@ router.get("/friends/friendRequest/:userSub", async (req, res, next) => {
                 res.json("No friend requests present")
             }
             else {
-                console.log(`user request = ${user.friendRequest}`);
+                // console.log(`user request = ${user.friendRequest}`);
                 res.json(user?.friendRequest);
             }
     } catch (error) {
@@ -255,7 +304,7 @@ router.get("/friends/friendRequest/:userSub", async (req, res, next) => {
 router.post("/friends/friendRequest", async (req, res, next) => {
     const { userSub, friendSub, friendName, friendPicture } = req.body;
     try {
-        console.log(`userSub = ${userSub} , friendSub = ${friendSub}`);
+        // console.log(`userSub = ${userSub} , friendSub = ${friendSub}`);
         const friend = await User.findOneAndUpdate({ user_id: userSub },
             { $set: { picture: friendPicture, username: friendName } }, { new: true });
         const user = await User.findOneAndUpdate({ user_id: friendSub },
@@ -269,12 +318,13 @@ router.post("/friends/friendRequest", async (req, res, next) => {
 })
 
 router.delete("/friends/friendRequest", async (req, res, next) => {
-    const { userSub, _id } = req.body;
+    const { userSub, _id, friendSub, friend_id } = req.body;
     try {
         console.log(`userSub = ${userSub} and _id = ${_id} in delete request`);
         const user = await User.findOneAndUpdate({ user_id: userSub }, { $pull: { friendRequest: _id } }, { new: true })
             .populate("friendRequest");
-
+        const room1 = await Room.findOneAndDelete({ friend_id: friendSub });
+        const room2 = await Room.findOneAndDelete({ friend_id: userSub });
         res.json(user?.friendRequest);
     } catch (error) {
         res.status(500).json("Error occured while deleting friend request");

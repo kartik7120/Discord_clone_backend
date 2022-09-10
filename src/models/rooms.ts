@@ -4,7 +4,8 @@ import Message from "../models/messages.js";
 interface roomInterface {
     roomName: string,
     message?: Types.ObjectId[],
-    channel?: Types.ObjectId
+    channel?: Types.ObjectId,
+    friend_id?: string
 }
 
 const roomSchema = new mongoose.Schema<roomInterface>({
@@ -14,11 +15,15 @@ const roomSchema = new mongoose.Schema<roomInterface>({
     },
     message: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref:"Message"
+        ref: "Message",
+        default: []
     }],
     channel: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Channel"
+    },
+    friend_id: {
+        type: String
     }
 })
 
