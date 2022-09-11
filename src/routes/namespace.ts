@@ -65,7 +65,8 @@ router.post("/joinChannel/:id", async (req, res, next) => {
     const { id } = req.params;
     const { userSub } = req.body;
     try {
-        const user = await User.findOneAndUpdate({ user_id: userSub }, { $push: { user_channels: id } }, { new: true });
+        const user = await User.findOneAndUpdate({ user_id: userSub },
+            { $push: { user_channels: id } }, { new: true, upsert: true });
         res.json(user?.user_channels);
     } catch (error) {
         res.status(500).json("Error occured while joining the room");
