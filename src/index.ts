@@ -7,14 +7,14 @@ import joinRoom from "./interfaces";
 import axios from "axios";
 import mongoose from "mongoose";
 import router from "./routes/namespace.js";
-debugger;
-mongoose.connect('mongodb://localhost:27017/Discord')
+dotenv.config();
+const URL = process.env.MONGO_DB_URL || "mongodb://localhost:27017/Discord"
+mongoose.connect(URL)
     .then(() => {
         console.log("Connected to MongoDB database");
     }).catch((err) => {
         console.log(`Error occured while connecting to the Mongo DB database = ${err}`)
     })
-dotenv.config();
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "50mb" }));
