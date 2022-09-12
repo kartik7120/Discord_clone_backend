@@ -21,7 +21,7 @@ const fetchUser = async (userSub: string) => {
         const URL = `${token_type} ${token}users/${userSub}?include_fields=true`;
         const config = {
             headers: {
-                'Authorization': process.env.AUTH_MANAGEMENT_API_TOKEN!
+                'Authorization': `${token_type} ${token}`!
             },
             "content-type": "application/json; charset=utf-8"
         }

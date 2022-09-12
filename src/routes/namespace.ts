@@ -97,7 +97,6 @@ router.post("/leaveNamespace/:id", async (req, res, next) => {
 router.post("/createNamespace/:namespace", async (req, res, next) => {
     const { namespace } = req.params;
     const userBody: createNamespace = req.body;
-    console.log(`usersub = ${userBody.userSub}`);
     try {
         const newChannel = new Channel({ channelName: namespace });
         await newChannel.save();
@@ -159,7 +158,6 @@ router.delete("/deleteNamespace/:id", async (req, res, next) => {
             .populate("user_channels");
         res.json(user?.user_channels);
     } catch (error) {
-        console.log(`Error while deleting namespace = ${error}`);
         res.status(500).json("Error occured while deleting channel");
     }
 })
@@ -193,7 +191,6 @@ router.post("/messages/:roomId", async (req, res, next) => {
             { new: true }).populate("message");
         res.json(room?.message);
     } catch (error) {
-        console.log(`Error while saving messages = ${JSON.stringify(error)}`);
         res.status(500).json("Error occured while saving message");
     }
 })
@@ -201,12 +198,9 @@ router.post("/messages/:roomId", async (req, res, next) => {
 router.get("/friend/message/:friendSub", async (req, res, next) => {
     const { friendSub } = req.params;
     try {
-        console.log(`friendSub in friend message get request = ${friendSub}`);
         const friend = await Room.findOne({ friend_id: friendSub }).populate("message");
-        console.log(`friend in friend message get request = ${friend}`);
         res.json(friend?.message);
     } catch (error) {
-        console.log(`Error occured while fetching friend messages = ${error} `);
         res.status(500).json("Error occured while fetching friend messages");
     }
 })
@@ -231,7 +225,6 @@ router.post("/friends", async (req, res, next) => {
         const user2 = await User.findOneAndUpdate({ user_id: userSub }, { $push: { friends: _id } }).populate("friends");
         await User.findOneAndUpdate({ user_id: friendSub }, { $pull: { friends: _id } });
         // Write query to add friend in the users list
-        console.log(`Friend sub = ${friendSub},friendId = ${friend_id}, userSub = ${userSub} and userId = ${_id}`)
         const room1 = new Room({ friend_id: friendSub, roomName: friend_id });
         const room2 = new Room({ friend_id: userSub, roomName: _id });
         await room1.save();
@@ -263,7 +256,6 @@ router.post("/friends/messages/:friendSub", async (req, res, next) => {
             { new: true }).populate("message");
         res.json(room2?.message);
     } catch (error) {
-        console.log(`Error occured while saving message for friend room = ${JSON.stringify(error)}`);
         res.status(500).json("Error occured while saving message for friend room");
     }
 })
@@ -275,7 +267,6 @@ router.delete("/friends/deleteFriend", async (req, res, next) => {
             { $pull: { friends: _id } }, { new: true }).populate("friends");
         res.json(user?.friends);
     } catch (error) {
-        console.log(`Error occured while deleting a friend = ${JSON.stringify(error)}`);
         res.status(500).json("Error occured while removing friends");
     }
 })
@@ -284,7 +275,6 @@ router.get("/friends/friendRequest/:userSub", async (req, res, next) => {
     const { userSub } = req.params;
     try {
         const user = await User.findOne({ user_id: userSub }).populate("friendRequest");
-        // console.log(`user in get request for friend request = ${user}`);
         if (!user) {
             res.json("No user exists")
         }
@@ -293,7 +283,6 @@ router.get("/friends/friendRequest/:userSub", async (req, res, next) => {
                 res.json("No friend requests present")
             }
             else {
-                // console.log(`user request = ${user.friendRequest}`);
                 res.json(user?.friendRequest);
             }
     } catch (error) {
@@ -304,7 +293,6 @@ router.get("/friends/friendRequest/:userSub", async (req, res, next) => {
 router.post("/friends/friendRequest", async (req, res, next) => {
     const { userSub, friendSub, friendName, friendPicture } = req.body;
     try {
-        // console.log(`userSub = ${userSub} , friendSub = ${friendSub}`);
         const friend = await User.findOneAndUpdate({ user_id: userSub },
             { $set: { picture: friendPicture, username: friendName } }, { new: true });
         const user = await User.findOneAndUpdate({ user_id: friendSub },
@@ -312,7 +300,6 @@ router.post("/friends/friendRequest", async (req, res, next) => {
             { new: true, upsert: true }).populate("friendRequest");
         res.json(user?.friendRequest);
     } catch (error) {
-        console.log(JSON.stringify(`Error while making friend request ${error}`));
         res.status(500).json("Error occured while sending friend request");
     }
 })
@@ -320,7 +307,6 @@ router.post("/friends/friendRequest", async (req, res, next) => {
 router.delete("/friends/friendRequest", async (req, res, next) => {
     const { userSub, _id, friendSub, friend_id } = req.body;
     try {
-        console.log(`userSub = ${userSub} and _id = ${_id} in delete request`);
         const user = await User.findOneAndUpdate({ user_id: userSub }, { $pull: { friendRequest: _id } }, { new: true })
             .populate("friendRequest");
         const room1 = await Room.findOneAndDelete({ friend_id: friendSub });

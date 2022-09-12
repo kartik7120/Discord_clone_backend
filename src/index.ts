@@ -38,10 +38,8 @@ io.use((socket, next) => {
 io.on("connection", async (socket) => {
     const namespace = socket.nsp.name;
     const sockets = await io.of(namespace).fetchSockets();
-    console.log(`socket id = ${socket.id} in ${namespace} namespace`);
     const numeberOfClients = io.of(namespace).sockets.size;
     const ioNumberOfClients = io.engine.clientsCount;
-    console.log(`Number of sockets connecteed in ${namespace} namespace = ${numeberOfClients}`);
     socket.on("joinRoom", async (arg: joinRoom, callback) => {
         socket.data = {
             userSub: arg.userSub,
@@ -82,14 +80,12 @@ io.on("connection", async (socket) => {
         for (let socket of socketRooms) {
             if (socket.id === socket_id) {
                 for (let room of socket.rooms) {
-                    console.log(`Room socket ${socket.id} leaving`);
                     socket.leave(room);
                 }
             }
             users.push(socket.data);
         }
         io.emit("userJoined", users);
-        console.log(`${socket_id} got disconnected from the namespace`);
         socket.disconnect();
     })
     socket.on("sticker", (stickerUrl: string, { message_content,
@@ -115,13 +111,10 @@ io.on("connection", async (socket) => {
         });
     })
     socket.on("leave-room", (room, id) => {
-        console.log(`socket ${id} left ${room} room`);
     })
     socket.on("disconnecting", (resson) => {
-        console.log(`Socket got disconnected due to ${resson}`);
     })
     socket.on("disconnect", (resson) => {
-        console.log(`Socket got disconnected due to ${resson} in disconnect event`);
     })
 })
 
